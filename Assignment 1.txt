@@ -1,0 +1,44 @@
+Table Schema - 
+
+create table gym_members(
+  id number(10) primary key,
+  name varchar2(20) not null,
+  age number(3) not null check(age>0),
+  joining_date Date not null,
+  expiration_date date not null,
+  city varchar2(30) default 'mumbai' not null,
+  height number(3) not null,
+  weight number(3) not null,
+  created_at date default sysdate,
+  cost number(10) not null check(cost>0)
+   );
+
+
+Sequence creation - 
+
+ create sequence Gym_seq
+  start with 1
+   increment by 1;
+
+Insert record - 
+
+insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'John Doe',25,'15-JAN-2023','31-DEC-2023','pune',170,70,1000);
+
+ insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'Jane Smith',30,'05-JAN-2023','25-DEC-2023','mumbai',160,50,2000);
+
+insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'Mike Johnson',33,'05-FEB-2023','25-NOV-2023','kolkata',150,85,3000);
+
+insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'Sara Brown',53,'05-Mar-2023','22-NOV-2023','pune',165,75,4000);
+
+insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'David Lee',28,'25-Jan-2023','21-Aug-2023','Benglore',155,85,5000);
+
+ insert into gym_members(id, name, age,joining_date,expiration_date,city,height,weight,cost) values(Gym_seq.nextval,'Emily Wilson',45,'12-Jan-2023','20-Dec-2023','Mumbai',145,95,4500);
+
+
+1. select * from gym_members where cost>3000;
+
+2. select * from gym_members where city='pune';
+
+3. select * from gym_members where city='Mumbai' and age>30;
+
+4. select * from gym_members where months_between(expiration_date,joining_date)>=9;
