@@ -1,0 +1,57 @@
+-- Table Creation
+
+create table bookings(
+id NUMBER(10) primary key,
+name varchar2(20) not null,
+roomNo NUMBER(10) not null,
+check_in_date DATE not null, 
+check_out_date DATE not null,
+discount NUMBER(30) not null,
+one_day_price NUMBER(30) not null check(one_day_price>0),
+country varchar2(30) default 'India' not null,
+created_at date default sysdate
+);
+
+-- Sequence creation 
+
+ create sequence book_seq
+  start with 1
+   increment by 1;
+
+-- Inserting values in table
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'John Doe', 101, '15-OCT-2023', '18-DEC-2023', 1, 250, 'USA');
+
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'Alice Smith', 103, '15-JUN-2023', '20-JUN-2023', 1, 150, 'CANADA');
+
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'Bob Johnson', 303, '01-AUG-2023', '7-AUG-2023', 2, 357, 'UK');
+
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'Pravin Shende', 307, '01-MAR-2023', '8-MAR-2023', 3, 175, 'INDIA');
+
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'Sagar Rasal', 302, '15-JAN-2023', '17-JAN-2023', 2, 185, 'INDIA');
+
+INSERT INTO bookings (id,name, roomNo, check_in_date, check_out_date, discount, one_day_price, country)
+VALUES (book_seq.nextval,'Michael Brown', 202, '16-JAN-2023', '19-JAN-2023', 2, 255, 'GERMANY');
+
+--Fetch the count of prople from different countries
+select country,count(*) from bookings group by country;
+
+--Display the data from which country we have maximum customers
+ select country,count(*) as count from bookings group by country order by count desc fetch first 1 row only;
+select country,count(*) as count from bookings group by country order by count desc fetch next 1 rows only;
+
+--Display all the customer whose checking month is june
+select name from bookings where EXTRACT(MONTH from check_in_date)=6;
+
+--Display all the customers who are living for more than four days
+ select name from bookings where (check_out_date - check_in_date)>4;
+
+--Display the final amount to be paid by customer with their names
+ select name, ((one_day_price*(1-discount/100))*(check_out_date-check_in_date)) as Final_amount from bookings;
+
+
+
