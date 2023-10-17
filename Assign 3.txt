@@ -1,0 +1,178 @@
+ create table departments(
+ id number(10) primary key,
+ name varchar2(20) not null unique, 
+ created_at date default sysdate);
+
+create sequence dept_seq
+start with 1
+increment by 1;
+
+insert into departments(id,name) values(dept_seq.nextval,'HR');
+
+create table employees(
+id number(10) primary key,
+name varchar2(20) not null,
+email varchar2(20) not null unique,
+city varchar2(20) not null,
+salary number(10) not null,
+d_id number(10),
+foreign key(d_id) references departments(id),
+created_at date default sysdate);
+
+insert into employees(id,name,email,city,salary,d_id) values(dept_seq.nextval,'Pravin','pravin34@gmail.com','Pune',45000,1);
+
+
+--inner join
+ select employees.name,departments.name from employees inner join departments on employees.d_id=departments.id;
+
+--left outer join
+ select employees.name,departments.name from employees left outer join departments on employees.d_id=departments.id;
+
+--right outer join
+select employees.name,departments.name from employees right outer join departments on employees.d_id=departments.id;
+
+--full join
+ select employees.name,departments.name from employees full join departments on employees.d_id=departments.id;
+
+--equi join
+select employees.name,departments.name from employees, departments where employees.d_id=departments.id;
+
+create table bank_details(
+id number(10) primary key,
+account_no number(20) not null unique,
+ifsc number(20) not null,
+branch varchar2(20) not null,
+eid number(10),
+foreign key(eid) references employees(id),
+created_at date default sysdate);
+
+--
+ insert into bank_details(id,account_no,ifsc,branch,eid) values(2,12432245,2345,'Mumbai',7);
+
+--fetch dept_name,emp_name,salary,account, branch for all employees
+select d.name,e.name,d.name,bd.account,bd.branch from departments d, employees e, bank_details bd where d.id=e.d_id and e.id=bd.eid;
+
+--Users
+create table Users(
+id number(10) primary key,
+name varchar2(20) not null,
+username varchar2(20) not null unique,
+password varchar(20) not null,
+bio varchar2(200),
+link varchar(200),
+type varchar(20) default 'Public',
+created_at date default sysdate
+);
+
+--
+insert into Users(id,name,username,password,bio,link,type) values(user_seq.nextval,'John Doe','john_doe123','pass1','Traveler','example.com/johndoe','Private');
+insert into Users(id,name,username,password,bio,link,type) values(user_seq.nextval,'Jane Smith','jane_smith123','pass2','Food Lover','example.com/janesmith','Private');
+insert into Users(id,name,username,password,bio,link,type) values(user_seq.nextval,'Mike Johnson','mike_johnson123','pass3','Tech Enthusiast','example.com/mikejohnson','Public');
+insert into Users(id,name,username,password,bio,link,type) values(user_seq.nextval,'pravin','pravin123','pass4','Driving','example.com/pravin','Public');
+insert into Users(id,name,username,password,bio,link,type) values(user_seq.nextval,'nisha','nisha123','pass5','Explorer','example.com/nisha','Private');
+
+
+
+--Posts
+create table Posts(
+id number(10) primary key,
+caption varchar(20),
+media varchar2(100),
+type varchar2(20),
+user_id number(10),
+foreign key(user_id) references users(id),
+created_at date default sysdate);
+
+
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Beautiful sunset','sunset.jpg','Image',1);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Delicious dinner','dinner.jpg','Image',2);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Morning workout','workout.jpg','Video',3);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Music Performance ','music.jpg','Audio',4);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Travel adventure','travel.jpg','Image',5);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Cooking','cook.jpg','Image',3);
+insert into posts(id,caption,media,type,user_id) values(post_seq.nextval,'Travel','travel1jpg','Image',1);
+
+
+
+
+
+--Comments
+create table Comments(
+id number(10) primary key,
+user_id number(10),
+foreign key(user_id) references users(id),
+post_id number(10),
+foreign key(post_id) references posts(id),
+message varchar2(20),
+created_at date default sysdate);
+
+ insert into comments(id,user_id,post_id,message) values(1,4,1,'Beautiful');
+insert into comments(id,user_id,post_id,message) values(2,5,4,'Fabulous');
+insert into comments(id,user_id,post_id,message) values(3,4,6,'Delicious');
+insert into comments(id,user_id,post_id,message) values(4,2,3,'Good days');
+insert into comments(id,user_id,post_id,message) values(6,4,4,'Nice day');
+
+
+--fetch all comments done by pravin
+select u.name,c.message from users u,comments c where u.id=c.user_id and u.name='pravin';
+
+--fetch all comments for post done by 'pravin'
+select u.name,p.id,p.caption,c.message from users u,comments c,posts p where u.id=p.user_id and p.id=c.post_id and u.name='pravin';
+
+--fetch all the post on which user has commented
+
+select * from users u, comments c, posts p where u.id=c.user_id and p.id=c.post_id and u.name='pravin' 
+
+
+1-- fetch the comment and commenter of a single post posted by 'pravin'
+select u.name,p.caption,c.message from 
+users u,posts p,comments c
+where u.id=c.user_id
+and p.id=c.post_id
+and p.id=(
+select p1.id from 
+users u1,posts p1 
+where u1.id=p1.user_id
+and u1.name='pravin'
+offset 1 rows fetch next 1 rows only	
+);
+
+
+
+
+2--fetch the commenters of all the post which were posted on 16th oct 2023.
+select u.name as commenter, p.caption 
+from users u,comments c,posts p 
+where p.id=c.post_id 
+and u.id=c.user_id 
+and trunc(p.created_at)='16-OCT-23';
+
+
+3--fetch the users whose account was created on 16th oct 2023
+select name,username,created_at from users where 
+trunc(created_at)='16-OCT-23';
+
+
+4--fetch the caption of the posts posted by 'pravin'
+select u.name as posted_by,p.caption from users u,posts p 
+where u.id=p.user_id and u.name='pravin';
+  
+
+5--fetch all the posts where commenter is itself the poster.
+select u.id,u.name,p.caption,c.user_id from users u,comments c,posts p 
+where p.id=c.post_id 
+and u.id=c.user_id 
+and p.user_id=c.user_id;
+
+6-- fetch all the posts where pravin has commented on its own post
+5--fetch all the posts where commenter is itself the poster.
+select u.id,u.name,p.caption,c.user_id from users u,comments c,posts p 
+where p.id=c.post_id 
+and u.id=c.user_id 
+and p.user_id=c.user_id
+and u.name='pravin';
+
+
+
+
+
