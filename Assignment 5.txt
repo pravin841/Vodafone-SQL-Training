@@ -1,0 +1,306 @@
+-------CURSOR -------
+
+begin
+update employees
+set city='Satara'
+where id=7;
+
+if sql%notfound=true then
+	dbms_output.put_line('the record not found');
+else
+	dbms_output.put_line(sql%rowcount||' rows got updated');
+end if;
+
+dbms_output.put_line(sys.diutil.bool_to_int(sql%found));
+dbms_output.put_line(sys.diutil.bool_to_int(sql%notfound));
+dbms_output.put_line(sql%rowcount);
+
+end;
+/
+
+
+explicit cursor - select
+
+declare
+cursor c_employees is select id,name,email,city,salary from employees;
+v_id employees.id%type;
+v_name employees.name%type;
+v_email employees.email%type;
+v_city employees.city%type;
+v_salary employees.salary%type;
+
+begin
+
+open c_employees;
+loop
+fetch c_employees into v_id,v_name,v_email,v_city,v_salary;
+exit when c_employees%notfound=true;
+dbms_output.put_line(v_name||' '||v_salary);
+end loop;
+close c_employees;
+
+end;
+/
+
+
+-----------
+
+declare
+cursor c_users is select id,name,username,password from users;
+v_id users.id%type;
+v_name users.name%type;
+v_username users.username%type;
+v_password users.password%type;
+
+begin
+
+open c_users;
+loop
+fetch c_users into v_id,v_name,v_username,v_password;
+exit when c_users%notfound=true;
+dbms_output.put_line(v_id||' '||v_name|| ' '||v_username||' '||v_password);
+end loop;
+close c_users;
+
+end;
+/
+
+--------------RECORDS-----------collection of properties/ it can stor a single whole row
+
+declare
+employee_r employees%rowtype;
+
+begin
+select * into employee_r from employees where id=2;
+dbms_output.put_line(employee_r.id||' '||employee_r.name);
+
+end;
+/
+
+
+----------------------------
+
+declare
+
+cursor c_employees is select * from employees;
+emp employees%rowtype;
+
+begin
+open c_employees;
+
+loop
+fetch c_employees into emp;
+exit when c_employees%notfound;
+
+dbms_output.put_line(emp.id||' '||emp.name);
+
+end loop;
+close c_employees;
+
+end;
+/
+
+----------single variable record---------
+
+declare
+
+cursor c_users is select * from users;
+user users%rowtype;
+
+begin
+open c_users;
+
+fetch c_users into user;
+
+dbms_output.put_line(user.id||' '||user.name);
+
+close c_users;
+
+end;
+/
+
+-------Procedure - block of code having some name which can be created once and call many times.
+
+create procedure greet
+as
+begin
+dbms_output.put_line('hello');
+end;
+/
+
+execute greet;
+
+---------
+
+create or replace procedure getemp(eid in number,emp out employees%rowtype)
+as
+begin
+select * into emp from employees where id=eid;
+end;
+/
+
+declare
+eid employees.id%type :=&eid;
+rec employees%rowtype;
+
+begin
+getemp(eid,rec);
+dbms_output.put_line(rec.name);
+end;
+/
+
+-------------
+create or replace procedure getemp1(eid in number,ename out employees.name%type,esal out employees.salary%type)
+as
+begin
+select name,salary into ename,esal from employees where id=eid;
+end;
+/
+
+declare
+
+eid employees.id%type :=&eid;
+ename employees.name%type;
+esal employees.salary%type;
+
+begin
+
+getemp1(eid,ename,esal);
+
+dbms_output.put_line(ename||' '||esal);
+
+end;
+/
+
+
+
+
+
+----------------FUNCTIONS----------
+
+create or replace function getData(n in number) return number
+is
+
+begin
+
+return n*2;
+
+end;
+/
+
+
+select getData from dual;
+
+declare
+a number;
+
+begin
+
+a:=getData(4);
+dbms_output.put_line(a);
+end;
+/
+
+
+
+-----------------
+create or replace function getData(ename in varchar2) return employees.email%type
+is
+eemail employees.email%type;
+begin
+
+select email into eemail from employees where name=ename;
+return eemail;
+
+end;
+/
+
+
+declare
+
+a employees.email%type;
+
+begin
+
+a:=getData('Pravin');
+dbms_output.put_line(a);
+end;
+/
+
+
+
+----------
+
+create or replace function getData(ename in varchar2) return employees.salary%type
+is
+esalary employees.salary%type;
+begin
+
+select salary into esalary from employees where name=ename;
+return (esalary*10)/100;
+
+end;
+/
+
+
+declare
+
+a employees.salary%type;
+
+begin
+
+a:=getData('Sagar');
+dbms_output.put_line(a);
+end;
+/
+
+
+-------------Triggers------------
+
+create or replace trigger displayUpdateMessage
+after update on employees
+for each row
+begin
+dbms_output.put_line(:OLD.name||' '||:old.city||' '||:old.salary);
+dbms_output.put_line(:new.name||' '||:new.city||' '||:new.salary);
+dbms_output.put_line('someone updates table');
+end;
+/
+
+
+--------
+create or replace trigger displayUpdateMessage
+after update on employees
+for each row
+begin
+dbms_output.put_line(:OLD.name||' '||:old.city||' '||:old.salary);
+dbms_output.put_line(:new.name||' '||:new.city||' '||:new.salary);
+dbms_output.put_line('someone updates table');
+dbms_output.put_line('Difference between salary is '||(:new.salary-:old.salary));
+end;
+/
+
+------------
+
+create or replace trigger blockIfLess
+before insert or update on employees
+for each row 
+begin
+if(:new.salary<20000)then
+raise_application_error(-20000,'salary cannot be less then 20000');
+end if;
+dbms_output.put_line('Operation successful');
+end;
+/
+
+
+
+
+-------------Views
+
+create or replace view emp_basic as
+select d.name as dname ,e.name as ename, e.salary, bd.account_no,bd.branch from
+departments d, employees e, bank_details bd
+where d.id=e.id
+and e.id=bd.id
+order by e.salary desc;
