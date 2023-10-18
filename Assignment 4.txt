@@ -1,0 +1,205 @@
+PL / SQL
+set serveroutput on;
+declare
+
+	variables		
+
+begin
+
+	dbms_output.put_line('Hello World');
+
+end;
+/
+
+declare
+
+	num number(2) :=&num;
+	name varchar2(20) :='pravin';
+	
+begin
+	dbms_output.put_line('The number is ' ||num|| ' and the name is ' ||name);
+end;
+/
+
+
+
+--------Arithmetic Operation ------------
+declare
+
+	num1 number(2) :=&num1;
+	num2 number(2) :=&num2;
+	result number(5);
+	
+begin
+	result :=num1+num2;
+	dbms_output.put_line('The addition of '||num1||' and '||num2||' is ' ||result);
+	
+	result :=num1-num2;
+	dbms_output.put_line('The substraction of '||num1||' and '||num2||' is ' ||result);
+
+	result :=num1*num2;
+	dbms_output.put_line('The multiplication of '||num1||' and '||num2||' is ' ||result);
+
+	result :=num1/num2;
+	dbms_output.put_line('The division of '||num1||' and '||num2||' is ' ||result);
+	
+end;
+/
+
+----------------
+
+declare
+vname employees.name%type;
+vcity employees.city%type;
+vemail employees.email%type;
+vsal employees.salary%type;
+
+begin
+select name, city,email,salary into vname,vcity,vemail,vsal from employees where id=7;
+dbms_output.put_line('the name is ' ||vname);
+dbms_output.put_line('the email is ' ||vemail);
+dbms_output.put_line('the city is ' ||vcity);
+dbms_output.put_line('the annual salary is ' ||vsal*12);
+
+
+end;
+/
+
+------------------------
+
+declare
+num number(2) :=12;
+
+begin
+
+if(num>20) then
+	dbms_output.put_line('Greater than 20');
+else
+	dbms_output.put_line('Less than 20');
+end if;
+end;
+/
+
+----------Ask user for salary
+
+declare
+sal number(10) :=&sal;
+
+begin
+if(sal>=100000) then
+	dbms_output.put_line('You have to give ' ||(sal*25)/100|| ' tax');
+elsif(sal>=60000 and sal<100000) then
+	dbms_output.put_line('You have to give ' ||(sal*15)/100|| ' tax');
+elsif(sal>=40000 and sal<60000) then
+	dbms_output.put_line('You have to give ' ||(sal*8)/100|| ' tax');
+else 
+	dbms_output.put_line('You have to give no tax');
+
+end if;
+
+end;
+/
+
+
+-----loop
+
+declare
+	
+	i number(2) :=1;
+begin
+	loop
+		dbms_output.put_line('Hello '||i);
+		i:=i+1;
+		if(i>10) then
+			exit;
+		end if;
+	end loop;
+
+	dbms_output.put_line('after loop');
+end;
+/
+
+
+-----table 
+declare
+	n number(2):=&num;
+	i number(2) :=1;
+begin
+	loop
+		dbms_output.put_line(n*i);
+		i:=i+1;
+		if(i>10) then
+			exit;
+		end if;
+	end loop;
+
+	dbms_output.put_line('after loop');
+end;
+/
+
+
+------
+declare
+i number(2);
+begin
+	for i in 1..10 loop
+		if MOD(i,2)!=0 then
+			dbms_output.put_line(i);
+		end if;
+	end loop;
+end;
+/
+
+
+
+-----Array------
+
+declare
+	type strFiveEles is varray(5) of varchar2(20);
+	avengers strFiveEles;
+begin
+	avengers := strFiveEles('Thor','Ironman','captain america','Hulk','Pravin');
+	for i in 1..avengers.count loop
+		dbms_output.put_line(avengers(i));
+	end loop;
+end;
+/
+
+-----Sum of array
+
+declare
+	type numFiveEles is varray(5) of number(2);
+	numbers numFiveEles;
+	result number(3):=0;
+begin
+	numbers :=numFiveEles(2,4,45,56,34);
+	for i in 1..numbers.count loop
+		result:=numbers(i)+result;
+	end loop;
+	dbms_output.put_line(result);
+end;
+/
+
+
+
+
+
+-------CURSOR -------
+
+begin
+update employees
+set city='Satara'
+where id=7;
+
+if sql%notfound=true then
+	dbms_output.put_line('the record not found');
+else
+	dbms_output.put_line(sql%rowcount||' rows got updated');
+end if;
+
+dbms_output.put_line(sys.diutil.bool_to_int(sql%found));
+dbms_output.put_line(sys.diutil.bool_to_int(sql%notfound));
+dbms_output.put_line(sql%rowcount);
+
+end;
+/
